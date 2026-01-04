@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">🩺 MediCript Admin Dashboard</h2>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow p-3 mb-4 rounded-3">
+                <h4>Doctors</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Specialization</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doctor in doctors %}
+                        <tr>
+                            <td>{{ doctor.name }}</td>
+                            <td>{{ doctor.specialization }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-center">No doctors available</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow p-3 mb-4 rounded-3">
+                <h4>Patients</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Age</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in patients %}
+                        <tr>
+                            <td>{{ patient.name }}</td>
+                            <td>{{ patient.age }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="2" class="text-center">No patients available</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow p-3 rounded-3">
+        <h4>Doctor–Patient Consents</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Doctor</th>
+                    <th>Patient</th>
+                    <th>Granted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for consent in consents %}
+                <tr>
+                    <td>{{ consent.doctor.name }}</td>
+                    <td>{{ consent.patient.name }}</td>
+                    <td>{% if consent.granted %}✅ Yes{% else %}❌ No{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-center">No consents available</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

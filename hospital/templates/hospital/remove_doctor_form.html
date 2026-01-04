@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Remove Doctor</title>
+</head>
+<body>
+
+<h2>Remove Doctor</h2>
+
+<form method="post">
+    {% csrf_token %}
+    <label>Select Doctor:</label>
+    <select name="doctor_id">
+        {% for d in doctors %}
+            <option value="{{ d.id }}">{{ d.name }} ({{ d.specialization }})</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit" style="background:red; color:white;">Delete</button>
+</form>
+
+<br>
+<a href="{% url 'dashboard' %}">⬅ Back to Dashboard</a>
+
+</body>
+</html>

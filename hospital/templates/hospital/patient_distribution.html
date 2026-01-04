@@ -1,0 +1,56 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div style="max-width:900px; margin: 0 auto;">
+    <h1 style="text-align:center; margin-bottom:20px;">Patient Distribution by Doctor</h1>
+
+    <!-- Canvas for chart -->
+    <canvas id="patientChart" width="800" height="400"></canvas>
+</div>
+
+<!-- Pass data safely from Django to JS -->
+{{ data|json_script:"patient-data" }}
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Parse JSON data passed from Django
+    const data = JSON.parse(document.getElementById('patient-data').textContent);
+
+    // Prepare labels (doctor names) and dataset (number of patients)
+    const labels = data.map(item => item.doctor);
+    const patientCounts = data.map(item => item.patients.length);
+
+    const ctx = document.getElementById('patientChart').getContext('2d');
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Number of Patients',
+                data: patientCounts,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: true }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Number of Patients' }
+                },
+                x: {
+                    title: { display: true, text: 'Doctors' }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

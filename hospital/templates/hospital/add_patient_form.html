@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Patient</title>
+</head>
+<body>
+
+<h2>Add Patient</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Save Patient</button>
+</form>
+
+<br>
+<a href="{% url 'dashboard' %}">⬅ Back to Dashboard</a>
+
+</body>
+</html>

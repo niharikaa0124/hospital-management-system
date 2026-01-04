@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuardianDB Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #50c878;
+            --accent-color: #e74c3c;
+            --background-gradient: linear-gradient(135deg, #e3f2fd 0%, #f1f8e9 100%);
+            --sidebar-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --border-radius: 15px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: var(--background-gradient);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .header .tagline {
+            font-size: 16px;
+            font-weight: 300;
+            margin-left: 10px;
+            opacity: 0.9;
+        }
+
+        .logout-btn {
+            background: var(--accent-color);
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            min-height: calc(100vh - 120px);
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar {
+            width: 300px;
+            background: var(--sidebar-bg);
+            border-right: 2px solid #e9ecef;
+            padding: 25px;
+            overflow-y: auto;
+            box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .sidebar h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 20px;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar li {
+            margin: 10px 0;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: #2980b9;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transition: left 0.5s;
+            z-index: -1;
+        }
+
+        .sidebar a:hover::before, .sidebar a.active::before {
+            left: 0;
+        }
+
+        .sidebar a:hover, .sidebar a.active {
+            color: white;
+            transform: translateX(10px);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(241, 248, 233, 0.9) 100%);
+        }
+
+        .main-content h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .section h2 {
+            color: #34495e;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 24px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
+            margin: 15px 0;
+            padding: 20px;
+            border-radius: 12px;
+            transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        li:hover {
+            background: linear-gradient(135deg, #d5dbdb 0%, #bdc3c7 100%);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        a {
+            text-decoration: none;
+            color: #2980b9;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #21618c;
+        }
+
+        .no-patients {
+            text-align: center;
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 40px;
+            font-size: 18px;
+        }
+
+        #graph {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        form input, form select, form textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        form input:focus, form select:focus, form textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+            background: white;
+        }
+
+        form textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        form button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        form button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        table th, table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 600;
+        }
+
+        table tr:hover {
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 2px solid #e9ecef;
+            }
+            .main-content {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-shield-alt"></i> GuardianDB <span class="tagline">Privacy-First Healthcare Database</span></h1>
+        <a href="{% url 'logout' %}" class="logout-btn">Logout</a>
+    </div>
+    <div class="container">
+        <div class="sidebar">
+            <h2><i class="fas fa-bars"></i> Navigation</h2>
+            <ul>
+                <li><a href="#" class="nav-link active" data-section="patient-data"><i class="fas fa-users"></i> Patient Data</a></li>
+                <li><a href="#" class="nav-link" data-section="bar-graph"><i class="fas fa-chart-bar"></i> Bar Graph</a></li>
+                <li><a href="#" class="nav-link" data-section="doctor-patient"><i class="fas fa-project-diagram"></i> Doctor-Patient Relationship</a></li>
+                <li><a href="#" class="nav-link" data-section="calendar"><i class="fas fa-calendar"></i>Appointment Calendar</a></li>
+            </ul>
+            {% if doctor_user %}
+            <li>
+                <a href="#" class="nav-link" data-section="add-appointment">
+                    <i class="fas fa-calendar-plus"></i> Add Appointment
+                </a>
+            </li>
+            {% endif %}
+
+            {% if request.user.is_superuser %}
+            <h2><i class="fas fa-cogs"></i> Admin Actions</h2>
+            <ul>
+                <li><a href="#" class="nav-link" data-section="add-doctor"><i class="fas fa-user-md"></i> Add Doctor</a></li>
+                <li><a href="#" class="nav-link" data-section="remove-doctor"><i class="fas fa-user-times"></i> Remove Doctor</a></li>
+                <li><a href="#" class="nav-link" data-section="add-patient"><i class="fas fa-user-plus"></i> Add Patient</a></li>
+                <li><a href="#" class="nav-link" data-section="remove-patient"><i class="fas fa-user-minus"></i> Remove Patient</a></li>
+                <li><a href="#" class="nav-link" data-section="add-consent"><i class="fas fa-check-circle"></i> Add Consent</a></li>
+                <li>
+                    <a href="#" class="nav-link" data-section="access-logs">
+                        <i class="fas fa-history"></i> Access Logs
+                    </a>
+                </li>
+            </ul>
+            {% endif %}
+
+        </div>
+        <div class="main-content">
+            <h1>Welcome, {{ request.user.username }}</h1>
+
+            <!-- Patient Data Section -->
+            <div id="patient-data" class="section active">
+                <h2><i class="fas fa-users"></i> Patients</h2>
+                <ul>
+                    {% for patient in patients %}
+                        <li>
+                            <a href="{% url 'patient_detail' patient.id %}">
+                                {{ patient.name }} ({{ patient.age }})
+                            </a>
+                        </li>
+                    {% empty %}
+                        <li class="no-patients">No patients found.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <!-- Bar Graph Section -->
+            <div id="bar-graph" class="section">
+                <h2><i class="fas fa-chart-bar"></i> Bar Chart</h2>
+                <canvas id="patientChart" width="800" height="400"></canvas>
+            </div>
+
+            <!-- Doctor-Patient Relationship Section -->
+            <div id="doctor-patient" class="section">
+                <h2><i class="fas fa-project-diagram"></i> Doctor-Patient Graph</h2>
+                <div id="graph"></div>
+            </div>
+
+            <!-- Access Log -->
+            {% if request.user.is_superuser %}
+            <div id="access-logs" class="section">
+                <h2><i class="fas fa-history"></i> Access Logs</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Actor</th>
+                            <th>Patient</th>
+                            <th>Action</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in access_logs %}
+                        <tr>
+                            <td>
+                                {% if log.user %}
+                                    {{ log.user.username }} (Admin/User)
+                                {% elif log.doctor %}
+                                    Dr. {{ log.doctor.name }}
+                                {% else %}
+                                    Unknown
+                                {% endif %}
+                            </td>
+                            <td>{{ log.patient.name }}</td>
+                            <td>{{ log.action }}</td>
+                            <td>{{ log.timestamp }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align:center;">No logs found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+
+            <!-- Pass chart & graph data -->
+            {{ chart_data|json_script:"chart-data" }}
+            {{ graph_data|json_script:"graph-data" }}
+
+            <div id="add-doctor" class="section">
+    <h2><i class="fas fa-user-md"></i> Add Doctor</h2>
+    <form method="post" action="{% url 'add_doctor' %}">
+        {% csrf_token %}
+        {{ add_doctor_form.as_p }}
+        <button type="submit">Save Doctor</button>
+    </form>
+</div>
+
+
+            <!-- Remove Doctor Section -->
+            <div id="remove-doctor" class="section">
+                <h2><i class="fas fa-user-times"></i> Remove Doctor</h2>
+                <form method="post" action="/remove-doctor/">
+                    {% csrf_token %}
+                    <label>Select Doctor:</label>
+                    <select name="doctor_id">
+                        {% for d in doctors %}
+                            <option value="{{ d.id }}">{{ d.name }} ({{ d.specialization }})</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Delete</button>
+                </form>
+            </div>
+
+            <!-- Add Patient Section -->
+            <div id="add-patient" class="section">
+                <h2><i class="fas fa-user-plus"></i> Add Patient</h2>
+                <form method="post" action="/add-patient/">
+                    {% csrf_token %}
+                    {{ add_patient_form.as_p }}
+                    <button type="submit">Save Patient</button>
+                </form>
+            </div>
+
+            <!-- Remove Patient Section -->
+            <div id="remove-patient" class="section">
+                <h2><i class="fas fa-user-minus"></i> Remove Patient</h2>
+                <form method="post" action="/remove-patient/">
+                    {% csrf_token %}
+                    <label>Select Patient:</label>
+                    <select name="patient_id">
+                        {% for p in patients %}
+                            <option value="{{ p.id }}">{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Delete</button>
+                </form>
+            </div>
+
+            <!-- Add Consent Section -->
+            <div id="add-consent" class="section">
+                <h2><i class="fas fa-check-circle"></i> Assign Consent</h2>
+                <form method="post" action="{% url 'add_consent' %}">
+                    {% csrf_token %}
+                    <label>Select Patient:</label>
+                    <select name="patient">
+                        {% for p in patients %}
+                            <option value="{{ p.id }}">{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <br><br>
+                    <label>Select Doctor:</label>
+                    <select name="doctor">
+                        {% for d in doctors %}
+                            <option value="{{ d.id }}">{{ d.name }} ({{ d.specialization }})</option>
+                        {% endfor %}
+                    </select>
+                    <br><br>
+                    <label>Consent Granted?</label>
+                    <input type="checkbox" name="granted">
+                    <br><br>
+                    <button type="submit">Save Consent</button>
+                </form>
+            </div>
+            <!-- Add Calender -->
+            <div id="calendar" class="section">
+                <h2><i class="fas fa-calendar"></i> Appointment Calendar</h2>
+                <div id="calendar-view" style="background:white; padding:20px; border-radius:10px;min-height:600px;"></div>
+            </div>
+
+           <div id="add-appointment" class="section">
+    <h2><i class="fas fa-calendar-plus"></i> Add Appointment</h2>
+
+    <form method="post" action="{% url 'add_appointment' %}">
+        {% csrf_token %}
+
+        <label>Select Patient:</label>
+        <select name="patient" required>
+            {% for p in patients %}
+                <option value="{{ p.id }}">{{ p.name }} ({{ p.age }})</option>
+            {% endfor %}
+        </select>
+
+        <label>Appointment Date:</label>
+        <input type="datetime-local" name="appointment_date" required>
+
+        <label>Notes:</label>
+        <textarea name="notes" placeholder="Enter appointment notes..."></textarea>
+
+        <button type="submit">Save Appointment</button>
+    </form>
+
+    {% if doctor_user %}
+    <h3 style="margin-top: 40px;"><i class="fas fa-user-check"></i> Your Patients (with Consent)</h3>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Patient Name</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in doctor_patients %}
+            <tr>
+                <td>{{ patient.name }}</td>
+                <td>
+                    <a href="{% url 'update_medical_history' patient.id %}"
+                       style="color:#4a90e2; font-weight:600;">
+                       Update Medical History
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" style="text-align:center; font-style:italic; padding:20px;">
+                    No patients have granted consent yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+</div> <!-- End of main-content -->
+</div> <!-- End of container -->
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Cytoscape.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.25.1/cytoscape.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    let chartCreated = false;
+    let graphCreated = false;
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('.section');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const sectionId = this.dataset.section;
+
+            navLinks.forEach(l => l.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+
+            this.classList.add('active');
+            document.getElementById(sectionId).classList.add('active');
+
+            if (sectionId === 'bar-graph' && !chartCreated) {
+                const data = JSON.parse(document.getElementById('chart-data').textContent);
+                const labels = data.map(d => d.doctor);
+                const counts = data.map(d => d.patients.length);
+
+                new Chart(document.getElementById('patientChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Number of Patients',
+                            data: counts,
+                            backgroundColor: 'rgba(74,144,226,0.6)',
+                            borderColor: 'rgba(74,144,226,1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { scales: { y: { beginAtZero: true } } }
+                });
+
+                chartCreated = true;
+            }
+
+            if (sectionId === 'doctor-patient' && !graphCreated) {
+                const graphData = JSON.parse(document.getElementById('graph-data').textContent);
+
+                cytoscape({
+                    container: document.getElementById('graph'),
+                    elements: [...graphData.nodes, ...graphData.edges],
+                    style: [
+                        { selector: 'node[type="doctor"]', style: {
+                            'shape': 'rectangle', 'background-color': '#3498db',
+                            'label': 'data(label)', 'color': '#000',
+                            'text-valign': 'center', 'text-halign': 'center',
+                            'font-size': '12px', 'width': 140, 'height': 60,
+                            'shape-border-radius': 10
+                        }},
+                        { selector: 'node[type="patient"]', style: {
+                            'shape': 'rectangle', 'background-color': '#2ecc71',
+                            'label': 'data(label)', 'color': '#000',
+                            'text-valign': 'center', 'text-halign': 'center',
+                            'font-size': '10px', 'width': 140, 'height': 60,
+                            'shape-border-radius': 10
+                        }},
+                        { selector: 'edge', style: {
+                            'width': 2, 'line-color': '#95a5a6',
+                            'target-arrow-color': '#95a5a6',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier'
+                        }}
+                    ],
+                    layout: { name: 'cose', padding: 30 }
+                });
+
+                graphCreated = true;
+            }
+        });
+    });
+
+});
+</script>
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    let calendarInitialized = false;
+
+    document.querySelectorAll(".nav-link").forEach(link => {
+        link.addEventListener("click", function () {
+            const section = this.getAttribute("data-section");
+
+            if (section === "calendar" && !calendarInitialized) {
+                initCalendar();
+                calendarInitialized = true;
+            }
+        });
+    });
+
+    function initCalendar() {
+
+        const calendarEl = document.getElementById("calendar-view");
+
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: "dayGridMonth",
+            height: 600,
+            events: "/appointments-json/",
+            eventColor: "#4a90e2",
+            eventTextColor: "#fff"
+        });
+
+        calendar.render();
+    }
+
+});
+
+</script>
+
+</body>
+</html>
