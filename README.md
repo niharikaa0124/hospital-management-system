@@ -37,14 +37,14 @@ USER: postgres
 PASSWORD: *****
 HOST: localhost
 PORT: 5432
-Apply migrations and create a superuser
 
-## from the folder that contains manage.py
+## Apply migrations and create a superuser
+from the folder that contains manage.py
 cd .\Hospital-Management-System-DBMS\guardiandb
 python manage.py migrate
 python manage.py createsuperuser
-Run the development server
 
+## Run the development server
 python manage.py runserver
 App will be available at: http://127.0.0.1:8000/
 
